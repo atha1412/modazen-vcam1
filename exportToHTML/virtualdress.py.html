@@ -1,0 +1,62 @@
+<html>
+<head>
+<title>virtualdress.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cc7832;}
+.s1 { color: #a9b7c6;}
+.s2 { color: #6897bb;}
+.s3 { color: #6a8759;}
+.s4 { color: #808080;}
+</style>
+</head>
+<body bgcolor="#2b2b2b">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+virtualdress.py</font>
+</center></td></tr></table>
+<pre><span class="s0">import </span><span class="s1">os</span>
+
+<span class="s0">import </span><span class="s1">cvzone</span>
+<span class="s0">import </span><span class="s1">cv2</span>
+<span class="s0">from </span><span class="s1">cvzone.PoseModule </span><span class="s0">import </span><span class="s1">PoseDetector</span>
+
+<span class="s1">cap = cv2.VideoCapture(</span><span class="s2">0</span><span class="s1">)</span>
+<span class="s1">detector = PoseDetector()</span>
+
+<span class="s1">shirtFolderPath = </span><span class="s3">&quot;Resources/Shirts&quot;</span>
+<span class="s1">listShirts = os.listdir(shirtFolderPath)</span>
+<span class="s4"># print(listShirts)</span>
+<span class="s1">fixedRatio = </span><span class="s2">262</span><span class="s1">/</span><span class="s2">190  </span><span class="s4"># widthOfShirt/widthOfPoint11to12</span>
+<span class="s1">shirtRatioHeightWidth = </span><span class="s2">581 </span><span class="s1">/ </span><span class="s2">440</span>
+
+<span class="s0">while True</span><span class="s1">:</span>
+    <span class="s1">success</span><span class="s0">, </span><span class="s1">img = cap.read()</span>
+    <span class="s1">img = detector.findPose(img)</span>
+   <span class="s4"># img = cv2.flip(img,1)</span>
+    <span class="s1">lmList</span><span class="s0">, </span><span class="s1">bboxInfo = detector.findPosition(img</span><span class="s0">, </span><span class="s1">bboxWithHands=</span><span class="s0">False, </span><span class="s1">draw=</span><span class="s0">False</span><span class="s1">)</span>
+    <span class="s0">if </span><span class="s1">lmList:</span>
+        <span class="s4"># center = bboxInfo[&quot;center&quot;]</span>
+        <span class="s1">lm11 = lmList[</span><span class="s2">11</span><span class="s1">][</span><span class="s2">1</span><span class="s1">:</span><span class="s2">3</span><span class="s1">]</span>
+        <span class="s1">lm12 = lmList[</span><span class="s2">12</span><span class="s1">][</span><span class="s2">1</span><span class="s1">:</span><span class="s2">3</span><span class="s1">]</span>
+        <span class="s1">imgShirt = cv2.imread(os.path.join(shirtFolderPath</span><span class="s0">,</span><span class="s1">listShirts[</span><span class="s2">0</span><span class="s1">])</span><span class="s0">,</span><span class="s1">cv2.IMREAD_UNCHANGED)</span>
+
+        <span class="s1">widthOfShirt = int((lm11[</span><span class="s2">0</span><span class="s1">] - lm12[</span><span class="s2">0</span><span class="s1">]) * fixedRatio)</span>
+        <span class="s1">print(widthOfShirt)</span>
+        <span class="s1">imgShirt = cv2.resize(imgShirt</span><span class="s0">, </span><span class="s1">(widthOfShirt</span><span class="s0">, </span><span class="s1">int(widthOfShirt * shirtRatioHeightWidth)))</span>
+        <span class="s1">currentScale = (lm11[</span><span class="s2">0</span><span class="s1">] - lm12[</span><span class="s2">0</span><span class="s1">]) / </span><span class="s2">190</span>
+        <span class="s1">offset = int(</span><span class="s2">44 </span><span class="s1">* currentScale)</span><span class="s0">,</span><span class="s1">int(</span><span class="s2">48 </span><span class="s1">* currentScale)</span>
+
+        <span class="s0">try</span><span class="s1">:</span>
+            <span class="s1">img = cvzone.overlayPNG(img</span><span class="s0">, </span><span class="s1">imgShirt</span><span class="s0">, </span><span class="s1">(lm12[</span><span class="s2">0</span><span class="s1">]-offset[</span><span class="s2">0</span><span class="s1">]</span><span class="s0">, </span><span class="s1">lm12[</span><span class="s2">1</span><span class="s1">] - offset[</span><span class="s2">1</span><span class="s1">]))</span>
+        <span class="s0">except</span><span class="s1">:</span>
+            <span class="s0">pass</span>
+
+
+    <span class="s1">cv2.imshow(</span><span class="s3">&quot;Image&quot;</span><span class="s0">, </span><span class="s1">img)</span>
+    <span class="s1">cv2.waitKey(</span><span class="s2">1</span><span class="s1">)</span>
+
+</pre>
+</body>
+</html>
